@@ -1,0 +1,409 @@
+{
+  "categories": [
+    {
+      "title": "TECHNICAL",
+      "courses": [
+        {
+          "title": "Software Engineering",
+          "duration": "8h 20min",
+          "lessons": 30,
+          "image": "assets/programing.jpeg",
+          "description": "Learn software development methodologies, design patterns, and best practices for building scalable applications.",
+          "modules": [
+            {"title": "SDLC Overview", "content": "Understanding software development life cycle phases"},
+            {"title": "Design Patterns", "content": "Implementing common architectural patterns"},
+            {"title": "Testing Strategies", "content": "Unit, integration and end-to-end testing approaches"},
+            {"title": "DevOps Practices", "content": "CI/CD pipelines and deployment strategies"}
+          ]
+        },
+        {
+          "title": "Network Administration",
+          "duration": "6h 50min",
+          "lessons": 25,
+          "image": "assets/programing.jpeg",
+          "description": "Master network configuration, security protocols, and infrastructure management.",
+          "modules": [
+            {"title": "Network Fundamentals", "content": "TCP/IP, DNS, DHCP basics"},
+            {"title": "Router Configuration", "content": "Setting up and managing network routers"},
+            {"title": "Security Protocols", "content": "Implementing firewalls and VPNs"},
+            {"title": "Troubleshooting", "content": "Diagnosing common network issues"}
+          ]
+        },
+        {
+          "title": "Web Development",
+          "duration": "7h 10min",
+          "lessons": 28,
+          "image": "assets/programing.jpeg",
+          "description": "Full-stack web development with modern frameworks and responsive design techniques.",
+          "modules": [
+            {"title": "HTML5 & CSS3", "content": "Building responsive layouts"},
+            {"title": "JavaScript Fundamentals", "content": "DOM manipulation and ES6 features"},
+            {"title": "Backend Integration", "content": "Connecting to databases and APIs"},
+            {"title": "Deployment", "content": "Hosting and scaling web applications"}
+          ]
+        },
+        {
+          "title": "AI & Machine Learning",
+          "duration": "9h 45min",
+          "lessons": 35,
+          "image": "assets/programing.jpeg",
+          "description": "Introduction to artificial intelligence algorithms and machine learning models.",
+          "modules": [
+            {"title": "ML Fundamentals", "content": "Supervised vs unsupervised learning"},
+            {"title": "Neural Networks", "content": "Building basic neural architectures"},
+            {"title": "Natural Language Processing", "content": "Text analysis and generation"},
+            {"title": "Model Deployment", "content": "Integrating ML models into applications"}
+          ]
+        },
+        {
+          "title": "Mobile App Development",
+          "duration": "6h 30min",
+          "lessons": 22,
+          "image": "assets/programing.jpeg",
+          "description": "Build cross-platform mobile applications using industry-standard frameworks.",
+          "modules": [
+            {"title": "UI Design Principles", "content": "Creating intuitive mobile interfaces"},
+            {"title": "State Management", "content": "Managing application data flow"},
+            {"title": "Device Features", "content": "Accessing camera, GPS and sensors"},
+            {"title": "App Store Deployment", "content": "Publishing to iOS and Android"}
+          ]
+        },
+        {
+          "title": "Database Management",
+          "duration": "5h 20min",
+          "lessons": 18,
+          "image": "assets/programing.jpeg",
+          "description": "Design, implement and optimize relational and NoSQL databases.",
+          "modules": [
+            {"title": "SQL Fundamentals", "content": "Writing complex queries"},
+            {"title": "Schema Design", "content": "Normalization and relationships"},
+            {"title": "NoSQL Databases", "content": "MongoDB and document databases"},
+            {"title": "Performance Tuning", "content": "Indexing and query optimization"}
+          ]
+        },
+        {
+          "title": "Cybersecurity Basics",
+          "duration": "4h 50min",
+          "lessons": 20,
+          "image": "assets/programing.jpeg",
+          "description": "Essential security practices for protecting systems and data.",
+          "modules": [
+            {"title": "Threat Landscape", "content": "Common vulnerabilities and attacks"},
+            {"title": "Encryption", "content": "Symmetric and asymmetric cryptography"},
+            {"title": "Network Security", "content": "Firewalls and intrusion detection"},
+            {"title": "Security Policies", "content": "Developing organizational security standards"}
+          ]
+        },
+        {
+          "title": "Cloud Computing",
+          "duration": "7h 00min",
+          "lessons": 26,
+          "image": "assets/programing.jpeg",
+          "description": "Deploy and manage applications in cloud environments.",
+          "modules": [
+            {"title": "Cloud Models", "content": "IaaS, PaaS, SaaS comparison"},
+            {"title": "AWS Fundamentals", "content": "EC2, S3 and basic services"},
+            {"title": "Serverless Architecture", "content": "Building with AWS Lambda"},
+            {"title": "Cloud Security", "content": "IAM and security best practices"}
+          ]
+        },
+        {
+          "title": "Computer Hardware",
+          "duration": "3h 40min",
+          "lessons": 15,
+          "image": "assets/programing.jpeg",
+          "description": "Understand computer components and troubleshooting techniques.",
+          "modules": [
+            {"title": "Component Identification", "content": "CPU, GPU, RAM and storage"},
+            {"title": "Assembly Techniques", "content": "Building a PC step-by-step"},
+            {"title": "Hardware Diagnostics", "content": "Troubleshooting common issues"},
+            {"title": "Upgrading Strategies", "content": "When and how to upgrade components"}
+          ]
+        },
+        {
+          "title": "Data Science Intro",
+          "duration": "6h 15min",
+          "lessons": 24,
+          "image": "assets/programing.jpeg",
+          "description": "Foundations of data analysis, visualization and interpretation.",
+          "modules": [
+            {"title": "Python for Data", "content": "Pandas and NumPy fundamentals"},
+            {"title": "Data Visualization", "content": "Creating charts with Matplotlib"},
+            {"title": "Statistical Analysis", "content": "Descriptive and inferential statistics"},
+            {"title": "Data Cleaning", "content": "Handling missing data and outliers"}
+          ]
+        }
+      ]
+    },
+    {
+      "title": "VOCATIONAL",
+      "courses": [
+        {
+          "title": "Fashion Design",
+          "duration": "4h 30min",
+          "lessons": 18,
+          "image": "assets/programing.jpeg",
+          "description": "Principles of clothing design and garment construction techniques.",
+          "modules": [
+            {"title": "Sketching Techniques", "content": "Fashion illustration basics"},
+            {"title": "Fabric Selection", "content": "Understanding material properties"},
+            {"title": "Pattern Making", "content": "Creating custom clothing patterns"},
+            {"title": "Sewing Fundamentals", "content": "Machine operation and hand stitching"}
+          ]
+        },
+        {
+          "title": "Interior Decoration",
+          "duration": "5h 15min",
+          "lessons": 20,
+          "image": "assets/programing.jpeg",
+          "description": "Transform spaces with color theory, furniture arrangement and styling.",
+          "modules": [
+            {"title": "Color Theory", "content": "Creating harmonious color schemes"},
+            {"title": "Space Planning", "content": "Optimizing room layouts"},
+            {"title": "Lighting Design", "content": "Ambient, task and accent lighting"},
+            {"title": "Styling Accessories", "content": "Selecting and arranging decor items"}
+          ]
+        },
+        {
+          "title": "Carpentry",
+          "duration": "3h 50min",
+          "lessons": 14,
+          "image": "assets/programing.jpeg",
+          "description": "Woodworking techniques for furniture and structural elements.",
+          "modules": [
+            {"title": "Tool Safety", "content": "Proper use of saws and power tools"},
+            {"title": "Joinery Techniques", "content": "Dovetail, mortise and tenon joints"},
+            {"title": "Furniture Construction", "content": "Building tables and chairs"},
+            {"title": "Finishing Methods", "content": "Sanding, staining and sealing"}
+          ]
+        },
+        {
+          "title": "Plumbing Basics",
+          "duration": "2h 45min",
+          "lessons": 10,
+          "image": "assets/programing.jpeg",
+          "description": "Essential plumbing systems installation and repair.",
+          "modules": [
+            {"title": "Pipe Systems", "content": "Working with PVC, copper and PEX"},
+            {"title": "Fixture Installation", "content": "Sinks, toilets and showers"},
+            {"title": "Drainage Systems", "content": "Understanding venting and traps"},
+            {"title": "Leak Repair", "content": "Identifying and fixing common leaks"}
+          ]
+        },
+        {
+          "title": "Electrical Installation",
+          "duration": "4h 20min",
+          "lessons": 16,
+          "image": "assets/programing.jpeg",
+          "description": "Safe electrical wiring practices for residential applications.",
+          "modules": [
+            {"title": "Circuit Fundamentals", "content": "Understanding voltage and current"},
+            {"title": "Wiring Techniques", "content": "Running cables and making connections"},
+            {"title": "Safety Protocols", "content": "Grounding and GFCI protection"},
+            {"title": "Troubleshooting", "content": "Diagnosing common electrical issues"}
+          ]
+        },
+        {
+          "title": "Welding",
+          "duration": "5h 00min",
+          "lessons": 19,
+          "image": "assets/programing.jpeg",
+          "description": "Metal joining techniques using various welding methods.",
+          "modules": [
+            {"title": "Safety Equipment", "content": "Proper PPE for welding"},
+            {"title": "MIG Welding", "content": "Gas metal arc welding techniques"},
+            {"title": "TIG Welding", "content": "Precision welding for thin materials"},
+            {"title": "Joint Preparation", "content": "Cleaning and fitting metal pieces"}
+          ]
+        },
+        {
+          "title": "Hair Styling",
+          "duration": "3h 25min",
+          "lessons": 12,
+          "image": "assets/programing.jpeg",
+          "description": "Professional hair cutting, coloring and styling techniques.",
+          "modules": [
+            {"title": "Cutting Techniques", "content": "Layering and texturizing"},
+            {"title": "Color Theory", "content": "Mixing and applying hair color"},
+            {"title": "Styling Methods", "content": "Blowouts and thermal styling"},
+            {"title": "Client Consultation", "content": "Understanding client needs"}
+          ]
+        },
+        {
+          "title": "Baking and Pastry",
+          "duration": "4h 10min",
+          "lessons": 15,
+          "image": "assets/programing.jpeg",
+          "description": "Artisan breads, desserts and pastry creation fundamentals.",
+          "modules": [
+            {"title": "Dough Preparation", "content": "Kneading and fermentation"},
+            {"title": "Pastry Techniques", "content": "Laminating and puff pastry"},
+            {"title": "Cake Decorating", "content": "Frosting and piping skills"},
+            {"title": "Oven Science", "content": "Temperature control and baking times"}
+          ]
+        },
+        {
+          "title": "Photography",
+          "duration": "3h 55min",
+          "lessons": 13,
+          "image": "assets/programing.jpeg",
+          "description": "Camera operation and composition for compelling images.",
+          "modules": [
+            {"title": "Exposure Triangle", "content": "Aperture, shutter speed and ISO"},
+            {"title": "Composition Rules", "content": "Framing and leading lines"},
+            {"title": "Lighting Techniques", "content": "Natural and artificial lighting"},
+            {"title": "Post-Processing", "content": "Basic photo editing workflows"}
+          ]
+        },
+        {
+          "title": "Catering Services",
+          "duration": "4h 45min",
+          "lessons": 17,
+          "image": "assets/programing.jpeg",
+          "description": "Planning and executing professional food service events.",
+          "modules": [
+            {"title": "Menu Planning", "content": "Creating balanced menus"},
+            {"title": "Food Safety", "content": "HACCP principles for catering"},
+            {"title": "Event Setup", "content": "Buffet and plated service styles"},
+            {"title": "Client Management", "content": "Consultation and contract basics"}
+          ]
+        }
+      ]
+    },
+    {
+      "title": "BASIC EDUCATION",
+      "courses": [
+        {
+          "title": "Basic Mathematics",
+          "duration": "3h 10min",
+          "lessons": 12,
+          "image": "assets/programing.jpeg",
+          "description": "Foundational arithmetic, algebra and problem-solving skills.",
+          "modules": [
+            {"title": "Arithmetic Operations", "content": "Addition, subtraction, multiplication, division"},
+            {"title": "Fractions & Decimals", "content": "Operations with fractional numbers"},
+            {"title": "Basic Algebra", "content": "Solving simple equations"},
+            {"title": "Word Problems", "content": "Applying math to real-world scenarios"}
+          ]
+        },
+        {
+          "title": "English Language",
+          "duration": "3h 50min",
+          "lessons": 14,
+          "image": "assets/programing.jpeg",
+          "description": "Grammar, vocabulary and communication skills development.",
+          "modules": [
+            {"title": "Grammar Fundamentals", "content": "Parts of speech and sentence structure"},
+            {"title": "Vocabulary Building", "content": "Root words and context usage"},
+            {"title": "Reading Comprehension", "content": "Understanding and analyzing texts"},
+            {"title": "Writing Skills", "content": "Paragraph and essay construction"}
+          ]
+        },
+        {
+          "title": "Science Basics",
+          "duration": "4h 00min",
+          "lessons": 15,
+          "image": "assets/programing.jpeg",
+          "description": "Introduction to biology, chemistry and physics principles.",
+          "modules": [
+            {"title": "Scientific Method", "content": "Observation, hypothesis and experimentation"},
+            {"title": "Biology Essentials", "content": "Cell structure and ecosystems"},
+            {"title": "Chemistry Fundamentals", "content": "Atoms, molecules and reactions"},
+            {"title": "Physics Concepts", "content": "Forces, motion and energy"}
+          ]
+        },
+        {
+          "title": "Geography",
+          "duration": "2h 55min",
+          "lessons": 11,
+          "image": "assets/programing.jpeg",
+          "description": "Earth's physical features, climates and human-environment interaction.",
+          "modules": [
+            {"title": "Map Reading", "content": "Understanding coordinates and scales"},
+            {"title": "Physical Geography", "content": "Landforms and natural systems"},
+            {"title": "Human Geography", "content": "Population and settlement patterns"},
+            {"title": "Climate Systems", "content": "Weather patterns and climate zones"}
+          ]
+        },
+        {
+          "title": "History",
+          "duration": "3h 30min",
+          "lessons": 13,
+          "image": "assets/programing.jpeg",
+          "description": "Key historical events, movements and their impact on modern society.",
+          "modules": [
+            {"title": "Ancient Civilizations", "content": "Egypt, Greece and Rome"},
+            {"title": "World Wars", "content": "Causes and consequences of major conflicts"},
+            {"title": "Independence Movements", "content": "Decolonization processes"},
+            {"title": "Modern History", "content": "Post-war to contemporary era"}
+          ]
+        },
+        {
+          "title": "Civics Education",
+          "duration": "2h 45min",
+          "lessons": 10,
+          "image": "assets/programing.jpeg",
+          "description": "Government structures, civic rights and responsibilities.",
+          "modules": [
+            {"title": "Government Systems", "content": "Democracy, monarchy and republics"},
+            {"title": "Constitution Basics", "content": "Fundamental rights and duties"},
+            {"title": "Electoral Processes", "content": "How elections work"},
+            {"title": "Community Engagement", "content": "Participating in civic life"}
+          ]
+        },
+        {
+          "title": "Reading & Comprehension",
+          "duration": "3h 20min",
+          "lessons": 12,
+          "image": "assets/programing.jpeg",
+          "description": "Strategies for understanding and analyzing various text types.",
+          "modules": [
+            {"title": "Skimming Techniques", "content": "Quickly identifying main ideas"},
+            {"title": "Inference Skills", "content": "Reading between the lines"},
+            {"title": "Vocabulary in Context", "content": "Understanding words from surrounding text"},
+            {"title": "Critical Analysis", "content": "Evaluating arguments and evidence"}
+          ]
+        },
+        {
+          "title": "Writing Skills",
+          "duration": "3h 40min",
+          "lessons": 14,
+          "image": "assets/programing.jpeg",
+          "description": "Developing clear, coherent and effective written communication.",
+          "modules": [
+            {"title": "Sentence Structure", "content": "Constructing grammatically correct sentences"},
+            {"title": "Paragraph Development", "content": "Organizing ideas logically"},
+            {"title": "Essay Writing", "content": "Introduction, body and conclusion"},
+            {"title": "Editing Techniques", "content": "Proofreading and revision strategies"}
+          ]
+        },
+        {
+          "title": "Health Education",
+          "duration": "3h 15min",
+          "lessons": 12,
+          "image": "assets/programing.jpeg",
+          "description": "Personal wellness, nutrition and disease prevention.",
+          "modules": [
+            {"title": "Nutrition Basics", "content": "Balanced diet and food groups"},
+            {"title": "Exercise Physiology", "content": "Benefits of physical activity"},
+            {"title": "Mental Wellness", "content": "Stress management techniques"},
+            {"title": "Disease Prevention", "content": "Hygiene and vaccination principles"}
+          ]
+        },
+        {
+          "title": "Environmental Studies",
+          "duration": "2h 50min",
+          "lessons": 11,
+          "image": "assets/programing.jpeg",
+          "description": "Ecosystems, conservation and human impact on the environment.",
+          "modules": [
+            {"title": "Ecosystem Dynamics", "content": "Food chains and biodiversity"},
+            {"title": "Conservation Principles", "content": "Protecting natural resources"},
+            {"title": "Pollution Control", "content": "Reducing environmental impact"},
+            {"title": "Sustainable Practices", "content": "Eco-friendly living strategies"}
+          ]
+        }
+      ]
+    }
+  ]
+}

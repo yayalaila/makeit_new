@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "734870286987",
+    "project_id": "makeit-6cec3",
+    "storage_bucket": "makeit-6cec3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:734870286987:android:a1f4eb4fcbf9279afcda8e",
+        "android_client_info": {
+          "package_name": "com.makeit.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuTTID2Gt0FJExjQpzQ2ZZR9TsBPmXDPs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
