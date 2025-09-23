@@ -46,6 +46,6 @@ apply(plugin = "com.google.gms.google-services")
 
 buildscript {
     dependencies {
-        classpath 'com.google.gms:google-services:4.3.15' // or latest
+        classpath("com.google.gms:google-services:4.3.15") // use parentheses and double quotes
     }
 }
