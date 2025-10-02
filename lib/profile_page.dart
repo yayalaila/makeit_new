@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:makeit/login_screen.dart';
 
 import 'mentor_home_page.dart' show MentorHomePage;
 
@@ -78,6 +80,17 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => LoginScreen()),
+        (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -148,7 +161,7 @@ class _ProfilePageState extends State<ProfilePage> {
             _buildMenuItem(Icons.person_add, 'Become a Mentor',
                 onTap: _navigateToBecomeMentor),
             _buildMenuItem(Icons.logout, 'Logout',
-                color: Colors.red, onTap: () {}),
+                color: Colors.red, onTap: _logout),
           ],
         ),
       ),

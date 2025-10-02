@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MentorProfilePage extends StatefulWidget {
+  const MentorProfilePage({super.key});
+
   @override
   _MentorProfilePageState createState() => _MentorProfilePageState();
 }
@@ -107,8 +109,9 @@ class _MentorProfilePageState extends State<MentorProfilePage> {
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Enter your email';
-                  if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value))
+                  if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
                     return 'Enter a valid email';
+                  }
                   return null;
                 },
               ),

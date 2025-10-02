@@ -1,7 +1,9 @@
 // lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
-import 'package:makeit/student_homepage.dart';
+// ignore: depend_on_referenced_packages
+import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:makeit/student_homepage.dart';
 import 'package:makeit/signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -12,22 +14,73 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool _obscureText = true; // To toggle password visibility
+  bool _obscureText = true;
+  bool _isLoading = false;
+
+  // Controllers to capture email & password input
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  // Login function with FirebaseAuth
+  Future<void> _login() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter email and password')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // If login succeeds, go to StudentHomePage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => StudentHomePage()),
+      );
+    } on FirebaseAuthException catch (e) {
+      // Show Firebase error in a snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'Login failed')),
+      );
+    } catch (e) {
+      // Handle any other errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An unexpected error occurred')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // White background as per image
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          // Prevents overflow on keyboard appearance
           padding: const EdgeInsets.symmetric(horizontal: 25.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 50), // Spacing from top
+              SizedBox(height: 50),
               Text(
-                'Log In As A Student', // Title as per image
+                'Log In As A Student',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -35,10 +88,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: 10),
-              SizedBox(height: 40), // Space between title and first input
-
+              SizedBox(height: 40),
               Text(
-                'Your Email', // Label for email field
+                'Your Email',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -48,13 +100,14 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey[100], // Light grey background
+                  color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: TextField(
+                  controller: _emailController, // capture email
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    hintText: 'Cooper_Kristin@gmail.com', // Hint text
+                    hintText: 'Cooper_Kristin@gmail.com',
                     hintStyle: TextStyle(color: Colors.grey[500]),
                     border: InputBorder.none,
                     contentPadding:
@@ -64,8 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Color(0xFF47E6FB)), // Cyan focus border
+                      borderSide: BorderSide(color: Color(0xFF47E6FB)),
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
@@ -73,9 +125,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: 25),
-
               Text(
-                'Password', // Label for password field
+                'Password',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -85,13 +136,14 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey[100], // Light grey background
+                  color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: TextField(
-                  obscureText: _obscureText, // Toggle visibility
+                  controller: _passwordController, // capture password
+                  obscureText: _obscureText,
                   decoration: InputDecoration(
-                    hintText: '••••••••••••', // Hint text
+                    hintText: '••••••••••••',
                     hintStyle: TextStyle(color: Colors.grey[500]),
                     border: InputBorder.none,
                     contentPadding:
@@ -101,15 +153,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Color(0xFF47E6FB)), // Cyan focus border
+                      borderSide: BorderSide(color: Color(0xFF47E6FB)),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscureText
-                            ? Icons.visibility_off
-                            : Icons.visibility, // Visibility icon
+                        _obscureText ? Icons.visibility_off : Icons.visibility,
                         color: Colors.grey[600],
                       ),
                       onPressed: () {
@@ -126,56 +175,72 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {
-                    // TODO: Implement forgot password logic
-                    print('Forgot password pressed');
+                  onPressed: () async {
+                    if (_emailController.text.trim().isNotEmpty) {
+                      try {
+                        await FirebaseAuth.instance.sendPasswordResetEmail(
+                          email: _emailController.text.trim(),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Password reset email sent')),
+                        );
+                      } on FirebaseAuthException catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(e.message ?? 'Error occurred')),
+                        );
+                      }
+                    }
                   },
                   child: Text(
-                    'Forget password?', // Forgot password link
+                    'Forget password?',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF47E6FB), // Cyan color
+                      color: Color(0xFF47E6FB),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: 20), // Space before Log In button
-
-              ElevatedButton(
-                onPressed: () {
-                  // TODO: Implement login logic (this button submits the form)
-                  print('Log In button pressed');
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              StudentHomePage())); // Navigate to StudentHomePage on login
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF47E6FB), // Cyan-like color
-                  padding: EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed:
+                      _isLoading ? null : _login, // ✅ Login with Firebase
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF47E6FB),
+                    padding: EdgeInsets.symmetric(vertical: 18),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    minimumSize: Size(double.infinity, 0),
                   ),
-                  minimumSize: Size(double.infinity, 0), // Full width button
-                ),
-                child: Text(
-                  'Log In', // Button text
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  child: _isLoading
+                      ? SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          'Log In',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
-              SizedBox(height: 20), // Space after button
-
+              SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Don't have an account? ", // Text for sign up link
+                    "Don't have an account? ",
                     style: TextStyle(
                       fontSize: 15,
                       color: Colors.grey[600],
@@ -183,8 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                      // Navigate to SignUpScreen
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                           builder: (context) => SignUpScreen(),
@@ -192,19 +256,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     },
                     child: Text(
-                      'Sign up', // Sign up link
+                      'Sign up',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF47E6FB), // Cyan-like color
+                        color: Color(0xFF47E6FB),
                       ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 30), // Space before "Or login with" line
-
-              // "Or login with" line with dividers
+              SizedBox(height: 30),
               Row(
                 children: [
                   Expanded(child: Divider(color: Colors.grey[300])),
@@ -218,9 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Expanded(child: Divider(color: Colors.grey[300])),
                 ],
               ),
-              SizedBox(height: 20), // Space before social buttons
-
-              // Social login buttons
+              SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -234,7 +294,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Center(
                       child: Icon(Icons.g_mobiledata,
-                          size: 40, color: Colors.blue), // Placeholder icon
+                          size: 40, color: Colors.blue),
                     ),
                   ),
                   SizedBox(width: 20),
@@ -248,13 +308,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Center(
                       child: Icon(Icons.facebook,
-                          size: 40,
-                          color: Colors.blue.shade800), // Placeholder icon
+                          size: 40, color: Colors.blue.shade800),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 50), // Spacing at the bottom
+              SizedBox(height: 50),
             ],
           ),
         ),
