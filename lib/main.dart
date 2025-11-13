@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 // import your pages (use your filenames)
 import 'package:makeit/login_screen.dart';
 import 'package:makeit/signup_screen.dart';
-import 'package:makeit/home_page.dart';
 import 'package:makeit/student_homepage.dart';
 
 void main() async {
