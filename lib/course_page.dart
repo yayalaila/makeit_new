@@ -188,7 +188,14 @@ class CourseCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Open detail page for this course
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => CourseDetailPage(courseId: course.id)),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF47E6FB),
                   shape: RoundedRectangleBorder(

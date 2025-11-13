@@ -1,3 +1,4 @@
+// Model for Course stored in Firestore
 class Course {
   final String id;
   final String title;
@@ -7,6 +8,7 @@ class Course {
   final String? imageUrl;
   final double price;
   final int enrolledCount;
+  final List<String> enrolledUsers;
   final DateTime createdAt;
   final List<String> tags;
 
@@ -19,6 +21,7 @@ class Course {
     this.imageUrl,
     required this.price,
     this.enrolledCount = 0,
+    this.enrolledUsers = const [],
     required this.createdAt,
     this.tags = const [],
   });
@@ -26,7 +29,6 @@ class Course {
   // Convert to Firestore document
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'title': title,
       'description': description,
       'mentorId': mentorId,
@@ -34,13 +36,27 @@ class Course {
       'imageUrl': imageUrl,
       'price': price,
       'enrolledCount': enrolledCount,
-      'createdAt': createdAt,
+      'enrolledUsers': enrolledUsers,
+      'createdAt': createdAt.toUtc(),
       'tags': tags,
     };
   }
 
   // Create from Firestore document
   factory Course.fromMap(Map<String, dynamic> map, String docId) {
+    // createdAt may be Timestamp (from Firestore) or String/DateTime
+    DateTime created = DateTime.now();
+    final rawCreated = map['createdAt'];
+    try {
+      if (rawCreated is DateTime) {
+        created = rawCreated;
+      } else if (rawCreated is String) {
+        created = DateTime.parse(rawCreated);
+      } else if (rawCreated != null && rawCreated.toDate != null) {
+        // Timestamp from Firestore
+        created = rawCreated.toDate();
+      }
+    } catch (_) {}
     return Course(
       id: docId,
       title: map['title'] ?? '',
@@ -49,8 +65,9 @@ class Course {
       mentorName: map['mentorName'] ?? '',
       imageUrl: map['imageUrl'],
       price: (map['price'] ?? 0).toDouble(),
-      enrolledCount: map['enrolledCount'] ?? 0,
-      createdAt: map['createdAt']?.toDate() ?? DateTime.now(),
+      enrolledCount: (map['enrolledCount'] ?? 0),
+      enrolledUsers: List<String>.from(map['enrolledUsers'] ?? []),
+      createdAt: created,
       tags: List<String>.from(map['tags'] ?? []),
     );
   }
