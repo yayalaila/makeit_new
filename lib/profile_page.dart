@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:makeit/login_screen.dart';
-
-import 'mentor_home_page.dart' show MentorHomePage;
+import 'package:makeit/mentor_home_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -76,7 +75,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _navigateToBecomeMentor() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => BecomeMentorPage()),
+      MaterialPageRoute(builder: (context) => MentorHomePage()),
     );
   }
 
@@ -194,93 +193,6 @@ class _ProfilePageState extends State<ProfilePage> {
       title: Text(title, style: TextStyle(fontSize: 16, color: color)),
       trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
       onTap: onTap,
-    );
-  }
-}
-
-class BecomeMentorPage extends StatefulWidget {
-  const BecomeMentorPage({super.key});
-
-  @override
-  _BecomeMentorPageState createState() => _BecomeMentorPageState();
-}
-
-class _BecomeMentorPageState extends State<BecomeMentorPage> {
-  final _formKey = GlobalKey<FormState>();
-  final nameController = TextEditingController();
-  final phoneController = TextEditingController();
-  final locationController = TextEditingController();
-  final specialityController = TextEditingController();
-
-  void submitApplication() {
-    if (_formKey.currentState!.validate()) {
-      // Optionally: save mentor details to Firestore or SharedPreferences
-
-      // Navigate to MentorHomePage
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MentorHomePage()),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar:
-          AppBar(title: Text("Become a Mentor"), backgroundColor: Colors.blue),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: nameController,
-                decoration: InputDecoration(labelText: 'Full Name'),
-                validator: (value) => value!.isEmpty ? 'Required' : null,
-              ),
-              TextFormField(
-                controller: phoneController,
-                decoration: InputDecoration(labelText: 'Phone Number'),
-                keyboardType: TextInputType.phone,
-                validator: (value) => value!.isEmpty ? 'Required' : null,
-              ),
-              TextFormField(
-                controller: locationController,
-                decoration: InputDecoration(labelText: 'Location'),
-                validator: (value) => value!.isEmpty ? 'Required' : null,
-              ),
-              TextFormField(
-                controller: specialityController,
-                decoration: InputDecoration(labelText: 'Speciality'),
-                validator: (value) => value!.isEmpty ? 'Required' : null,
-              ),
-              SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: submitApplication,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                child: Text("Confirm Information"),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class MentorDashboardPage extends StatelessWidget {
-  const MentorDashboardPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar:
-          AppBar(title: Text("Mentor Home Page"), backgroundColor: Colors.blue),
-      body: Center(
-        child: Text("Welcome to your dashboard, Mentor!"),
-      ),
     );
   }
 }

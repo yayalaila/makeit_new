@@ -1,196 +1,237 @@
 import 'package:flutter/material.dart';
-import 'package:makeit/course_category_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:makeit/upload_course_page.dart';
+import 'package:makeit/models/course_model.dart';
+import 'package:makeit/services/firestore_service.dart';
 
-class MentorHomePage extends StatelessWidget {
+class MentorHomePage extends StatefulWidget {
   const MentorHomePage({super.key});
+
+  @override
+  _MentorHomePageState createState() => _MentorHomePageState();
+}
+
+class _MentorHomePageState extends State<MentorHomePage> {
+  final FirestoreService _firestoreService = FirestoreService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.orange,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 0,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Courses'),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Students'),
-          BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Messages'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle), label: 'Account'),
-        ],
+      appBar: AppBar(
+        title: Text('My Courses'),
+        backgroundColor: Color(0xFF47E6FB),
+        elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Color(0xFF00CFFF),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
-                ),
-              ),
+      body: StreamBuilder<List<Course>>(
+        stream: _firestoreService.getCoursesStream(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          final allCourses = snapshot.data ?? [];
+          final userId = _auth.currentUser?.uid ?? '';
+          final myCourses =
+              allCourses.where((course) => course.mentorId == userId).toList();
+
+          if (myCourses.isEmpty) {
+            return Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: 40),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Hi, Mentor Lilatu',
-                        style: TextStyle(
-                          fontSize: 22,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  Icon(Icons.school, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text('No courses yet'),
+                  SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => UploadCoursePage(),
                       ),
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.person, color: Colors.blue),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 6),
-                  Text("Let's start teaching",
-                      style: TextStyle(color: Colors.white)),
-                  SizedBox(height: 20),
-                  Container(
-                    padding: EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Courses created",
-                              style: TextStyle(
-                                  fontSize: 14, color: Colors.grey[700]),
-                            ),
-                            SizedBox(height: 5),
-                            RichText(
-                              text: TextSpan(
-                                style: TextStyle(
-                                    fontSize: 24, color: Colors.black),
-                                children: [
-                                  TextSpan(text: "3 "),
-                                  TextSpan(
-                                      text: "/ 5",
-                                      style: TextStyle(color: Colors.grey)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            // Navigate to My Courses
-                          },
-                          child: Text("My Courses"),
-                        ),
-                      ],
+                    icon: Icon(Icons.add),
+                    label: Text('Create Your First Course'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF47E6FB),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFFEAF6FF),
-                  borderRadius: BorderRadius.circular(15),
+            );
+          }
+
+          return ListView(
+            padding: EdgeInsets.all(16),
+            children: [
+              ...myCourses.map((course) => MentorCourseCard(
+                    course: course,
+                    onEdit: () {
+                      // Implement edit functionality
+                    },
+                    onDelete: () => _deleteCourse(course.id),
+                  )),
+              SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => UploadCoursePage()),
                 ),
-                padding: EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.school_outlined,
-                          size: 36, color: Colors.orange),
-                    ),
-                    SizedBox(width: 20),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Start a New Course',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 10),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => CourseCategoryPage()),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                            ),
-                            child: Text('Create Course'),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
+                icon: Icon(Icons.add),
+                label: Text('Upload New Course'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF47E6FB),
+                  padding: EdgeInsets.symmetric(vertical: 16),
                 ),
               ),
-            ),
-            SizedBox(height: 30),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Your Courses',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            SizedBox(height: 10),
-            _buildCourseTile('Packaging Design', '24 Students'),
-            _buildCourseTile('Product Design', '10 Students'),
-          ],
-        ),
+              SizedBox(height: 20),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildCourseTile(String title, String subtitle) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 8)],
-        ),
-        child: ListTile(
-          leading: Icon(Icons.book, color: Colors.blue),
-          title: Text(title),
-          subtitle: Text(subtitle),
-          trailing: Icon(Icons.arrow_forward_ios, size: 16),
-          onTap: () {
-            // Navigate to course detail
-          },
+  Future<void> _deleteCourse(String courseId) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Course'),
+        content: Text('Are you sure you want to delete this course?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await _firestoreService.deleteCourse(courseId);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Course deleted successfully')),
+                );
+              } catch (e) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error deleting course')),
+                );
+              }
+            },
+            child: Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MentorCourseCard extends StatelessWidget {
+  final Course course;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const MentorCourseCard({
+    required this.course,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    course.title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF47E6FB),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '\$${course.price.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            Text(
+              course.description,
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${course.enrolledCount} students',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                Text(
+                  'Created ${course.createdAt.toString().split(' ')[0]}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+            SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  onPressed: onEdit,
+                  icon: Icon(Icons.edit, size: 18),
+                  label: Text('Edit'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Color(0xFF47E6FB),
+                  ),
+                ),
+                SizedBox(width: 8),
+                TextButton.icon(
+                  onPressed: onDelete,
+                  icon: Icon(Icons.delete, size: 18),
+                  label: Text('Delete'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
