@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'mentor_home_page.dart' show MentorHomePage;
 import 'package:makeit/login_screen.dart';
-import 'package:makeit/mentor_home_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -72,10 +74,11 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // Replace navigation to direct mentor page with application form
   void _navigateToBecomeMentor() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MentorHomePage()),
+      MaterialPageRoute(builder: (context) => MentorApplicationPage()),
     );
   }
 
@@ -193,6 +196,171 @@ class _ProfilePageState extends State<ProfilePage> {
       title: Text(title, style: TextStyle(fontSize: 16, color: color)),
       trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
       onTap: onTap,
+    );
+  }
+}
+
+// Replaced the previous BecomeMentorPage with a mentor application form
+class MentorApplicationPage extends StatefulWidget {
+  const MentorApplicationPage({super.key});
+
+  @override
+  _MentorApplicationPageState createState() => _MentorApplicationPageState();
+}
+
+class _MentorApplicationPageState extends State<MentorApplicationPage> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController specialityController = TextEditingController();
+  final TextEditingController motivationController = TextEditingController();
+  final TextEditingController whyBestController = TextEditingController();
+  final TextEditingController backgroundController = TextEditingController();
+
+  bool _isLoading = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  Future<void> submitApplication() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final user = _auth.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Please sign in to apply')));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      await _db.collection('mentor_applications').add({
+        'userId': user.uid,
+        'email': user.email,
+        'name': nameController.text.trim(),
+        'phone': phoneController.text.trim(),
+        'speciality': specialityController.text.trim(),
+        'motivation': motivationController.text.trim(),
+        'whyBest': whyBestController.text.trim(),
+        'background': backgroundController.text.trim(),
+        'status': 'pending',
+        'createdAt': Timestamp.now(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Application submitted. We will review it soon.')),
+      );
+      Navigator.pop(context); // return to profile
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Submission failed: ${e.toString()}')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    specialityController.dispose();
+    motivationController.dispose();
+    whyBestController.dispose();
+    backgroundController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Mentor Application'),
+        backgroundColor: Colors.blue,
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              Text(
+                'Apply to become a mentor',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: 'Full Name'),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Required' : null,
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: specialityController,
+                decoration:
+                    InputDecoration(labelText: 'Speciality / Course Area'),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Required' : null,
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: phoneController,
+                decoration: InputDecoration(labelText: 'Phone Number'),
+                keyboardType: TextInputType.phone,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Required' : null,
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: motivationController,
+                decoration: InputDecoration(
+                    labelText: 'Why do you want to teach this course?'),
+                maxLines: 3,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Required' : null,
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: whyBestController,
+                decoration: InputDecoration(
+                    labelText: 'Why are you the best to teach it?'),
+                maxLines: 3,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Required' : null,
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: backgroundController,
+                decoration:
+                    InputDecoration(labelText: 'Background / Experience'),
+                maxLines: 4,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Required' : null,
+              ),
+              SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : submitApplication,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    backgroundColor: Colors.blue,
+                  ),
+                  child: _isLoading
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2))
+                      : Text('Submit Application',
+                          style: TextStyle(fontSize: 16)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
