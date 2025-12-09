@@ -5,7 +5,7 @@ class UploadCoursePage extends StatelessWidget {
 
   const UploadCoursePage({super.key, required this.category});
 
-  get import => null;
+  Null get import => null;
 
   @override
   Widget build(BuildContext context) {

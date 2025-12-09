@@ -62,7 +62,7 @@ class FirestoreService {
       final snapshot = await tx.get(docRef);
       if (!snapshot.exists) throw Exception('Course not found');
 
-      final data = snapshot.data() as Map<String, dynamic>?; // safe read
+      final data = snapshot.data(); // safe read
       final enrolled = data != null && data['enrolledUsers'] != null
           ? List<String>.from(data['enrolledUsers'])
           : <String>[];
@@ -87,7 +87,7 @@ class FirestoreService {
       final snapshot = await tx.get(docRef);
       if (!snapshot.exists) throw Exception('Course not found');
 
-      final data = snapshot.data() as Map<String, dynamic>?; // safe read
+      final data = snapshot.data(); // safe read
       final enrolled = data != null && data['enrolledUsers'] != null
           ? List<String>.from(data['enrolledUsers'])
           : <String>[];
@@ -107,7 +107,7 @@ class FirestoreService {
     if (uid == null) return false;
     final doc = await _db.collection('courses').doc(courseId).get();
     if (!doc.exists) return false;
-    final data = doc.data() as Map<String, dynamic>?; // safe read
+    final data = doc.data(); // safe read
     final enrolled = data != null && data['enrolledUsers'] != null
         ? List<String>.from(data['enrolledUsers'])
         : <String>[];

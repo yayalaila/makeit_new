@@ -5,6 +5,7 @@ import 'package:makeit/message_page.dart';
 import 'package:makeit/profile_page.dart';
 import 'package:makeit/search.dart';
 import 'package:makeit/widgets/custom_nav_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class StudentHomePage extends StatefulWidget {
   const StudentHomePage({super.key});
@@ -15,6 +16,34 @@ class StudentHomePage extends StatefulWidget {
 
 class _StudentHomePageState extends State<StudentHomePage> {
   int _selectedIndex = 0; // For the bottom navigation bar
+  String _displayName = 'Student';
+
+  @override
+  void initState() {
+    super.initState();
+    _setDisplayName();
+    // Update name when auth state changes (sign in/out or profile update)
+    FirebaseAuth.instance.authStateChanges().listen((_) {
+      if (mounted) _setDisplayName();
+    });
+  }
+
+  void _setDisplayName() {
+    final user = FirebaseAuth.instance.currentUser;
+    String name = 'Student';
+    if (user != null) {
+      final dn = user.displayName;
+      final email = user.email;
+      if (dn != null && dn.trim().isNotEmpty) {
+        name = dn.trim();
+      } else if (email != null && email.contains('@')) {
+        name = email.split('@').first;
+      } else if (email != null) {
+        name = email;
+      }
+    }
+    setState(() => _displayName = name);
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -83,7 +112,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Hi, Nanazee',
+                          'Hi, $_displayName',
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -109,8 +138,17 @@ class _StudentHomePageState extends State<StudentHomePage> {
                         border: Border.all(color: Colors.white, width: 2),
                       ),
                       child: Center(
-                        child: Icon(Icons.person,
-                            size: 30, color: Colors.blueGrey),
+                        child: CircleAvatar(
+                          backgroundColor: Colors.white,
+                          child: Text(
+                            _displayName.isNotEmpty
+                                ? _displayName[0].toUpperCase()
+                                : 'S',
+                            style: TextStyle(
+                                color: Colors.blueGrey,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -228,7 +266,12 @@ class _StudentHomePageState extends State<StudentHomePage> {
                               SizedBox(height: 10),
                               ElevatedButton(
                                 onPressed: () {
-                                  print('Get Started button pressed');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CoursePage(),
+                                    ),
+                                  );
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.white,

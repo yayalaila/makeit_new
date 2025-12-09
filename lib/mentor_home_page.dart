@@ -141,6 +141,7 @@ class MentorCourseCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   const MentorCourseCard({
+    super.key,
     required this.course,
     required this.onEdit,
     required this.onDelete,

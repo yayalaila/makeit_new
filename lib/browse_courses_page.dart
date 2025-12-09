@@ -53,7 +53,7 @@ class _BrowseCoursesPageState extends State<BrowseCoursesPage> {
 class CourseCard extends StatelessWidget {
   final Course course;
 
-  const CourseCard({required this.course});
+  const CourseCard({super.key, required this.course});
 
   @override
   Widget build(BuildContext context) {
