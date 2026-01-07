@@ -1,4 +1,29 @@
 // Model for Course stored in Firestore
+class Lesson {
+  final String title;
+  final String? notes; // short notes or description
+  final String? youtubeLink;
+
+  Lesson({required this.title, this.notes, this.youtubeLink});
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'notes': notes,
+      'youtubeLink': youtubeLink,
+    };
+  }
+
+  factory Lesson.fromMap(Map<String, dynamic> map) {
+    return Lesson(
+      title: map['title'] ?? '',
+      notes: map['notes'],
+      youtubeLink: map['youtubeLink'],
+    );
+  }
+}
+
+// Model for Course stored in Firestore
 class Course {
   final String id;
   final String title;
@@ -11,6 +36,7 @@ class Course {
   final List<String> enrolledUsers;
   final DateTime createdAt;
   final List<String> tags;
+  final List<Lesson> lessons;
 
   Course({
     required this.id,
@@ -24,6 +50,7 @@ class Course {
     this.enrolledUsers = const [],
     required this.createdAt,
     this.tags = const [],
+    this.lessons = const [],
   });
 
   // Convert to Firestore document
@@ -39,6 +66,7 @@ class Course {
       'enrolledUsers': enrolledUsers,
       'createdAt': createdAt.toUtc(),
       'tags': tags,
+      'lessons': lessons.map((l) => l.toMap()).toList(),
     };
   }
 
@@ -57,6 +85,17 @@ class Course {
         created = rawCreated.toDate();
       }
     } catch (_) {}
+
+    final rawLessons = map['lessons'] ?? [];
+    List<Lesson> parsedLessons = [];
+    try {
+      parsedLessons = List<Map<String, dynamic>>.from(rawLessons)
+          .map((m) => Lesson.fromMap(m))
+          .toList();
+    } catch (_) {
+      parsedLessons = [];
+    }
+
     return Course(
       id: docId,
       title: map['title'] ?? '',
@@ -69,6 +108,7 @@ class Course {
       enrolledUsers: List<String>.from(map['enrolledUsers'] ?? []),
       createdAt: created,
       tags: List<String>.from(map['tags'] ?? []),
+      lessons: parsedLessons,
     );
   }
 }

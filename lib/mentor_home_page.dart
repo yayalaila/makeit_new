@@ -214,7 +214,14 @@ class MentorCourseCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton.icon(
-                  onPressed: onEdit,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => UploadCoursePage(course: course),
+                      ),
+                    );
+                  },
                   icon: Icon(Icons.edit, size: 18),
                   label: Text('Edit'),
                   style: TextButton.styleFrom(

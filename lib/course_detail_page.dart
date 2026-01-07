@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:makeit/services/firestore_service.dart';
 import 'package:makeit/models/course_model.dart';
 import 'package:makeit/login_screen.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CourseDetailPage extends StatefulWidget {
   final String courseId;
@@ -74,6 +76,63 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                           .toList()),
                 ],
                 SizedBox(height: 20),
+                if (course.lessons.isNotEmpty) ...[
+                  Text('Lessons',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 10),
+                  ...course.lessons.map((lesson) => Card(
+                        margin: EdgeInsets.only(bottom: 10),
+                        child: Padding(
+                          padding: EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(lesson.title,
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold)),
+                              if (lesson.notes != null &&
+                                  lesson.notes!.isNotEmpty) ...[
+                                SizedBox(height: 8),
+                                Text(lesson.notes!),
+                              ],
+                              if (lesson.youtubeLink != null &&
+                                  lesson.youtubeLink!.isNotEmpty) ...[
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                        child: Text(lesson.youtubeLink!,
+                                            style:
+                                                TextStyle(color: Colors.blue))),
+                                    TextButton(
+                                      onPressed: () async {
+                                        final link = lesson.youtubeLink ?? '';
+                                        if (link.isEmpty) return;
+                                        final uri = Uri.tryParse(link);
+                                        if (uri == null) return;
+                                        try {
+                                          await launchUrl(uri,
+                                              mode: LaunchMode
+                                                  .externalApplication);
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(SnackBar(
+                                                  content: Text(
+                                                      'Could not open link')));
+                                        }
+                                      },
+                                      child: Text('Open'),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ))
+                ],
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(

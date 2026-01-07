@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:makeit/login_screen.dart';
+import 'package:makeit/mentor_home_page.dart';
+import 'package:makeit/upload_course_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -154,7 +156,12 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             ),
             SizedBox(height: 30),
-            _buildMenuItem(Icons.menu_book, 'My Courses', onTap: () {}),
+            _buildMenuItem(Icons.menu_book, 'My Courses', onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => MentorHomePage()),
+              );
+            }),
             _buildMenuItem(Icons.card_membership, 'My Certificates',
                 onTap: () {}),
             _buildMenuItem(Icons.settings, 'Settings', onTap: () {}),
@@ -249,7 +256,11 @@ class _MentorApplicationPageState extends State<MentorApplicationPage> {
         SnackBar(
             content: Text('Application submitted. We will review it soon.')),
       );
-      Navigator.pop(context); // return to profile
+      // Navigate to course upload page so mentor can create a course
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => UploadCoursePage()),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Submission failed: ${e.toString()}')),

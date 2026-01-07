@@ -20,6 +20,7 @@ class FirestoreService {
       'enrolledUsers': <String>[],
       'createdAt': Timestamp.fromDate(course.createdAt),
       'tags': course.tags,
+      'lessons': course.lessons.map((l) => l.toMap()).toList(),
     });
     return docRef.id;
   }
@@ -40,7 +41,7 @@ class FirestoreService {
   Stream<Course?> getCourseStream(String courseId) {
     return _db.collection('courses').doc(courseId).snapshots().map((doc) {
       if (!doc.exists) return null;
-      return Course.fromMap(doc.data()!, doc.id);
+      return Course.fromMap(doc.data() ?? {}, doc.id);
     });
   }
 
@@ -48,7 +49,7 @@ class FirestoreService {
   Future<Course?> getCourse(String courseId) async {
     final doc = await _db.collection('courses').doc(courseId).get();
     if (!doc.exists) return null;
-    return Course.fromMap(doc.data()!, doc.id);
+    return Course.fromMap(doc.data() ?? {}, doc.id);
   }
 
   // Enroll current user in a course (atomic)
@@ -119,6 +120,25 @@ class FirestoreService {
       await _db.collection('courses').doc(courseId).delete();
     } catch (e) {
       throw Exception('Failed to delete course: $e');
+    }
+  }
+
+  // Update an existing course by id
+  Future<void> updateCourse(Course course) async {
+    if (course.id.isEmpty) throw Exception('Course id is required for update');
+    try {
+      await _db.collection('courses').doc(course.id).update({
+        'title': course.title,
+        'description': course.description,
+        'mentorId': course.mentorId,
+        'mentorName': course.mentorName,
+        'imageUrl': course.imageUrl,
+        'price': course.price,
+        'tags': course.tags,
+        'lessons': course.lessons.map((l) => l.toMap()).toList(),
+      });
+    } catch (e) {
+      throw Exception('Failed to update course: $e');
     }
   }
 }
