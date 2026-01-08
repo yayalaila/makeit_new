@@ -6,6 +6,7 @@ import 'package:makeit/profile_page.dart';
 import 'package:makeit/search.dart';
 import 'package:makeit/widgets/custom_nav_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:makeit/services/firestore_service.dart';
 
 class StudentHomePage extends StatefulWidget {
   const StudentHomePage({super.key});
@@ -17,6 +18,16 @@ class StudentHomePage extends StatefulWidget {
 class _StudentHomePageState extends State<StudentHomePage> {
   int _selectedIndex = 0; // For the bottom navigation bar
   String _displayName = 'Student';
+  // Simple in-memory learning plan for this page. Each `progress` unit
+  // represents minutes learned for now; this lets the UI show actual
+  // learned minutes instead of a hardcoded value.
+  final List<Map<String, dynamic>> _learningPlans = [
+    {'title': 'Packaging Design', 'progress': 40, 'total': 48},
+    {'title': 'Product Design', 'progress': 6, 'total': 24},
+  ];
+
+  final int _dailyTargetMinutes = 60;
+  final FirestoreService _firestore = FirestoreService();
 
   @override
   void initState() {
@@ -204,23 +215,41 @@ class _StudentHomePageState extends State<StudentHomePage> {
                             ],
                           ),
                           SizedBox(height: 10),
-                          Text(
-                            '46min / 60min',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
+                          StreamBuilder<int>(
+                            stream: _firestore.getTodayLearnedMinutesStream(),
+                            builder: (context, snapshot) {
+                              final int learned = snapshot.data ??
+                                  _learningPlans.fold(
+                                      0, (s, p) => s + (p['progress'] as int));
+                              final int target = _dailyTargetMinutes;
+                              final double progressValue = target > 0
+                                  ? (learned / target).clamp(0, 1).toDouble()
+                                  : 0.0;
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${learned}min / ${target}min',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  SizedBox(height: 15),
+                                  LinearProgressIndicator(
+                                    value: progressValue,
+                                    backgroundColor: Colors.grey[200],
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Color(0xFF47E6FB)),
+                                    minHeight: 8,
+                                  ),
+                                ],
+                              );
+                            },
                           ),
-                          SizedBox(height: 15),
-                          LinearProgressIndicator(
-                            value: 46 / 60,
-                            backgroundColor: Colors.grey[200],
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                Color(0xFF47E6FB)),
-                            minHeight: 8,
-                            borderRadius: BorderRadius.circular(5),
-                          ),
+                          SizedBox(height: 0),
                         ],
                       ),
                     ),

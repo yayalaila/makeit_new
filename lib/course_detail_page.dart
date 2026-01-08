@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:makeit/services/firestore_service.dart';
 import 'package:makeit/models/course_model.dart';
 import 'package:makeit/login_screen.dart';
-import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CourseDetailPage extends StatefulWidget {
@@ -81,57 +80,104 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   SizedBox(height: 10),
-                  ...course.lessons.map((lesson) => Card(
-                        margin: EdgeInsets.only(bottom: 10),
-                        child: Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(lesson.title,
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold)),
-                              if (lesson.notes != null &&
-                                  lesson.notes!.isNotEmpty) ...[
-                                SizedBox(height: 8),
-                                Text(lesson.notes!),
-                              ],
-                              if (lesson.youtubeLink != null &&
-                                  lesson.youtubeLink!.isNotEmpty) ...[
-                                SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                        child: Text(lesson.youtubeLink!,
-                                            style:
-                                                TextStyle(color: Colors.blue))),
-                                    TextButton(
-                                      onPressed: () async {
-                                        final link = lesson.youtubeLink ?? '';
-                                        if (link.isEmpty) return;
-                                        final uri = Uri.tryParse(link);
-                                        if (uri == null) return;
-                                        try {
-                                          await launchUrl(uri,
-                                              mode: LaunchMode
-                                                  .externalApplication);
-                                        } catch (e) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(SnackBar(
-                                                  content: Text(
-                                                      'Could not open link')));
-                                        }
-                                      },
-                                      child: Text('Open'),
-                                    )
-                                  ],
+                  ...course.lessons.asMap().entries.map((entry) {
+                    final idx = entry.key;
+                    final lesson = entry.value;
+                    return Card(
+                      margin: EdgeInsets.only(bottom: 10),
+                      child: Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(lesson.title,
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
+                            if (lesson.notes != null &&
+                                lesson.notes!.isNotEmpty) ...[
+                              SizedBox(height: 8),
+                              Text(lesson.notes!),
+                            ],
+                            if (lesson.youtubeLink != null &&
+                                lesson.youtubeLink!.isNotEmpty) ...[
+                              SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                      child: Text(lesson.youtubeLink!,
+                                          style:
+                                              TextStyle(color: Colors.blue))),
+                                  TextButton(
+                                    onPressed: () async {
+                                      final link = lesson.youtubeLink ?? '';
+                                      if (link.isEmpty) return;
+                                      final uri = Uri.tryParse(link);
+                                      if (uri == null) return;
+                                      try {
+                                        await launchUrl(uri,
+                                            mode:
+                                                LaunchMode.externalApplication);
+                                      } catch (e) {
+                                        if (!mounted) return;
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Could not open link')));
+                                      }
+                                    },
+                                    child: Text('Open'),
+                                  )
+                                ],
+                              ),
+                            ],
+                            SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    final user = _auth.currentUser;
+                                    if (user == null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: Text(
+                                                  'Sign in to record learning time')));
+                                      return;
+                                    }
+
+                                    try {
+                                      final added =
+                                          await _firestore.markLessonComplete(
+                                              course.id, idx.toString(), 10);
+                                      if (added) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Lesson marked complete — added 10 minutes')));
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Lesson already marked complete today')));
+                                      }
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: Text(
+                                                  'Failed: ${e.toString()}')));
+                                    }
+                                  },
+                                  child: Text('Mark Complete'),
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Color(0xFF47E6FB)),
                                 ),
                               ],
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ))
+                      ),
+                    );
+                  }).toList(),
                 ],
                 SizedBox(
                   width: double.infinity,
@@ -158,6 +204,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                           ),
                         );
                         if (shouldLogin == true) {
+                          if (!mounted) return;
                           Navigator.push(context,
                               MaterialPageRoute(builder: (_) => LoginScreen()));
                         }
@@ -167,10 +214,12 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       try {
                         if (!isEnrolled) {
                           await _firestore.enrollInCourse(course.id);
+                          if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Enrolled successfully')));
                         } else {
                           await _firestore.unenrollFromCourse(course.id);
+                          if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text('Unenrolled successfully')));
                         }
