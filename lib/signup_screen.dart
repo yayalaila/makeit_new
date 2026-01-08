@@ -65,14 +65,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
       // Optional: send email verification
       if (cred.user != null && !cred.user!.emailVerified) {
         await cred.user!.sendEmailVerification();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content:
-                  Text('Verification email sent — please check your inbox')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text('Verification email sent — please check your inbox')),
+          );
+        }
       }
 
       // Navigate to student home (replace current stack)
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => StudentHomePage()),
@@ -86,12 +89,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
       } else if (e.code == 'invalid-email') {
         message = 'The email address is not valid.';
       }
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(message)));
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message)));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An unexpected error occurred')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An unexpected error occurred')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

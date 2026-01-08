@@ -42,20 +42,25 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       // If login succeeds, go to StudentHomePage
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => StudentHomePage()),
       );
     } on FirebaseAuthException catch (e) {
       // Show Firebase error in a snackbar
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Login failed')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? 'Login failed')),
+        );
+      }
     } catch (e) {
       // Handle any other errors
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An unexpected error occurred')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An unexpected error occurred')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -181,14 +186,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         await FirebaseAuth.instance.sendPasswordResetEmail(
                           email: _emailController.text.trim(),
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Password reset email sent')),
-                        );
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Password reset email sent')),
+                          );
+                        }
                       } on FirebaseAuthException catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(e.message ?? 'Error occurred')),
-                        );
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(e.message ?? 'Error occurred')),
+                          );
+                        }
                       }
                     }
                   },

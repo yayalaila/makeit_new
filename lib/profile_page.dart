@@ -252,19 +252,23 @@ class _MentorApplicationPageState extends State<MentorApplicationPage> {
         'createdAt': Timestamp.now(),
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Application submitted. We will review it soon.')),
-      );
-      // Navigate to course upload page so mentor can create a course
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => UploadCoursePage()),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Application submitted. We will review it soon.')),
+        );
+        // Navigate to course upload page so mentor can create a course
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => UploadCoursePage()),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Submission failed: ${e.toString()}')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Submission failed: ${e.toString()}')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

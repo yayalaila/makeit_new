@@ -150,17 +150,20 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                                           await _firestore.markLessonComplete(
                                               course.id, idx.toString(), 10);
                                       if (added) {
+                                        if (!mounted) return;
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     'Lesson marked complete — added 10 minutes')));
                                       } else {
+                                        if (!mounted) return;
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     'Lesson already marked complete today')));
                                       }
                                     } catch (e) {
+                                      if (!mounted) return;
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(SnackBar(
                                               content: Text(

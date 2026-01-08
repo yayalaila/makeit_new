@@ -116,11 +116,13 @@ class _MentorHomePageState extends State<MentorHomePage> {
             onPressed: () async {
               try {
                 await _firestoreService.deleteCourse(courseId);
+                if (!mounted) return;
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Course deleted successfully')),
                 );
               } catch (e) {
+                if (!mounted) return;
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Error deleting course')),
