@@ -170,9 +170,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                                                   'Failed: ${e.toString()}')));
                                     }
                                   },
-                                  child: Text('Mark Complete'),
                                   style: ElevatedButton.styleFrom(
                                       backgroundColor: Color(0xFF47E6FB)),
+                                  child: Text('Mark Complete'),
                                 ),
                               ],
                             ),
@@ -180,7 +180,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                         ),
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
                 SizedBox(
                   width: double.infinity,

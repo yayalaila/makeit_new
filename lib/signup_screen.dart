@@ -89,9 +89,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       } else if (e.code == 'invalid-email') {
         message = 'The email address is not valid.';
       }
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(message)));
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
