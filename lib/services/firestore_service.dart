@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:makeit/models/course_model.dart';
+import 'package:makeit/models/chat_message.dart';
+import 'package:makeit/models/notification_model.dart';
 
 // Firestore helper for courses and enrollments
 class FirestoreService {
@@ -269,5 +271,92 @@ class FirestoreService {
     } catch (e) {
       throw Exception('Failed to update course: $e');
     }
+  }
+
+  // --- AI Chat Messages (per user) ---
+  Stream<List<ChatMessage>> getChatMessagesStream() {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return Stream.value(<ChatMessage>[]);
+
+    return _db
+        .collection('ai_chats')
+        .doc(uid)
+        .collection('messages')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snap) =>
+              snap.docs.map((d) => ChatMessage.fromMap(d.data(), d.id)).toList(),
+        );
+  }
+
+  Future<void> addChatMessage(ChatMessage message) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) throw Exception('Not authenticated');
+
+    await _db
+        .collection('ai_chats')
+        .doc(uid)
+        .collection('messages')
+        .add(message.toMap());
+  }
+
+  // --- Notifications (per user) ---
+  Stream<List<AppNotification>> getNotificationsStream() {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return Stream.value(<AppNotification>[]);
+
+    return _db
+        .collection('notifications')
+        .doc(uid)
+        .collection('items')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snap) => snap.docs
+            .map((d) => AppNotification.fromMap(d.data(), d.id))
+            .toList());
+  }
+
+  Stream<int> getUnreadNotificationsCountStream() {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return Stream.value(0);
+
+    return _db
+        .collection('notifications')
+        .doc(uid)
+        .collection('items')
+        .where('read', isEqualTo: false)
+        .snapshots()
+        .map((snap) => snap.size);
+  }
+
+  Future<void> markNotificationRead(String notificationId) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) throw Exception('Not authenticated');
+
+    await _db
+        .collection('notifications')
+        .doc(uid)
+        .collection('items')
+        .doc(notificationId)
+        .update({'read': true});
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) throw Exception('Not authenticated');
+
+    final query = await _db
+        .collection('notifications')
+        .doc(uid)
+        .collection('items')
+        .where('read', isEqualTo: false)
+        .get();
+
+    final batch = _db.batch();
+    for (final doc in query.docs) {
+      batch.update(doc.reference, {'read': true});
+    }
+    await batch.commit();
   }
 }

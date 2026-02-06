@@ -1,10 +1,15 @@
 // lib/screens/message_page.dart
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:makeit/course_page.dart';
 import 'package:makeit/profile_page.dart';
 import 'package:makeit/search.dart';
 import 'package:makeit/student_homepage.dart';
 import 'package:makeit/widgets/custom_nav_bar.dart';
+import 'package:makeit/services/firestore_service.dart';
+import 'package:makeit/services/ai_chat_service.dart';
+import 'package:makeit/models/chat_message.dart';
+import 'package:makeit/models/notification_model.dart';
 
 class MessagePage extends StatefulWidget {
   const MessagePage({super.key});
@@ -17,6 +22,14 @@ class _MessagePageState extends State<MessagePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int _selectedIndex = 0;
+  final FirestoreService _firestoreService = FirestoreService();
+  final AiChatService _aiChatService = AiChatService();
+  final TextEditingController _chatController = TextEditingController();
+  final ScrollController _chatScrollController = ScrollController();
+  bool _sending = false;
+  bool _shouldScrollToBottom = false;
+  int _unreadCount = 0;
+  StreamSubscription<int>? _unreadSub;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -63,12 +76,57 @@ class _MessagePageState extends State<MessagePage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _unreadSub =
+        _firestoreService.getUnreadNotificationsCountStream().listen((count) {
+      if (!mounted) return;
+      setState(() => _unreadCount = count);
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _chatController.dispose();
+    _chatScrollController.dispose();
+    _unreadSub?.cancel();
     super.dispose();
+  }
+
+  Future<void> _sendMessage() async {
+    final text = _chatController.text.trim();
+    if (text.isEmpty || _sending) return;
+
+    setState(() => _sending = true);
+    _chatController.clear();
+    _shouldScrollToBottom = true;
+
+    try {
+      await _firestoreService.addChatMessage(ChatMessage(
+        id: '',
+        role: 'user',
+        text: text,
+        createdAt: DateTime.now(),
+      ));
+
+      final reply = await _aiChatService.getReply(prompt: text);
+
+      _shouldScrollToBottom = true;
+      await _firestoreService.addChatMessage(ChatMessage(
+        id: '',
+        role: 'assistant',
+        text: reply,
+        createdAt: DateTime.now(),
+      ));
+    } catch (e) {
+      await _firestoreService.addChatMessage(ChatMessage(
+        id: '',
+        role: 'assistant',
+        text: 'Sorry, I ran into an error. Please try again.',
+        createdAt: DateTime.now(),
+      ));
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
   }
 
   @override
@@ -115,22 +173,30 @@ class _MessagePageState extends State<MessagePage>
                 fontSize: 16,
               ),
               tabs: [
-                Tab(text: 'message'),
+                Tab(text: 'AI Chat'),
                 Tab(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('notification'),
+                      Text('Notifications'),
                       SizedBox(width: 5),
-                      // Orange dot for notification, similar to image
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: Colors.orange, // Orange dot
-                          shape: BoxShape.circle,
+                      if (_unreadCount > 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            _unreadCount > 99 ? '99+' : '$_unreadCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -143,166 +209,184 @@ class _MessagePageState extends State<MessagePage>
         controller: _tabController,
         children: [
           // Message Tab Content
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                _buildMessageCard(
-                  sender: 'Bert Pullman',
-                  status: 'Online',
-                  time: '04:32 pm',
-                  message:
-                      'Congratulations on completing the first lesson, keep up the good work!',
-                  avatarColor: Colors.lightGreen[100]!, // Example color
-                ),
-                SizedBox(height: 20),
-                _buildMessageCard(
-                  sender: 'Daniel Lawson',
-                  status: 'Online',
-                  time: '04:32 pm',
-                  message:
-                      'Your course has been updated, you can check the new course in your study course.',
-                  avatarColor: Colors.lightBlue[100]!, // Example color
-                  hasImagePlaceholder:
-                      true, // For the blank image area in the sample
-                ),
-                SizedBox(height: 20),
-                _buildMessageCard(
-                  sender: 'Nguyen Shane',
-                  status: 'Offline',
-                  time: '12:00 am',
-                  message:
-                      'Congratulations, you have completed your registration! Now start your journey.',
-                  avatarColor: Colors.purple[100]!, // Example color
-                ),
-                SizedBox(height: 20),
-                // Add more messages as needed
-              ],
-            ),
-          ),
-
-          // Notification Tab Content (can be similar structure or different)
-          Center(
-            child: Text('Notifications will appear here!'),
-          ),
-        ],
-      ),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
-    );
-  }
-
-  // Helper method to build a single message/notification card
-  Widget _buildMessageCard({
-    required String sender,
-    required String status,
-    required String time,
-    required String message,
-    required Color avatarColor,
-    bool hasImagePlaceholder = false,
-  }) {
-    return Container(
-      padding: EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Column(
             children: [
-              // Avatar Placeholder
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: avatarColor,
-                  borderRadius:
-                      BorderRadius.circular(10), // Slightly rounded square
-                ),
-                child: Center(
-                  child: Icon(Icons.person,
-                      color: Colors.grey[600]), // Placeholder icon
+              Expanded(
+                child: StreamBuilder<List<ChatMessage>>(
+                  stream: _firestoreService.getChatMessagesStream(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+
+                    final messages = snapshot.data ?? [];
+                    if (messages.isEmpty) {
+                      return const Center(
+                        child: Text('Ask me anything about your courses.'),
+                      );
+                    }
+
+                    if (_shouldScrollToBottom &&
+                        _chatScrollController.hasClients) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (_chatScrollController.hasClients) {
+                          _chatScrollController.jumpTo(0);
+                        }
+                        _shouldScrollToBottom = false;
+                      });
+                    }
+
+                    return ListView.builder(
+                      controller: _chatScrollController,
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      reverse: true,
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        final msg = messages[index];
+                        final isUser = msg.role == 'user';
+                        return Align(
+                          alignment: isUser
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(vertical: 6),
+                            padding: const EdgeInsets.all(12),
+                            constraints: const BoxConstraints(maxWidth: 320),
+                            decoration: BoxDecoration(
+                              color: isUser
+                                  ? const Color(0xFF47E6FB)
+                                  : Colors.grey[200],
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Text(
+                              msg.text,
+                              style: TextStyle(
+                                color: isUser ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
-              SizedBox(width: 15),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          sender,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                    Expanded(
+                      child: TextField(
+                        controller: _chatController,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) => _sendMessage(),
+                        decoration: InputDecoration(
+                          hintText: 'Ask the AI assistant...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        Text(
-                          time,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      status,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: status == 'Online'
-                            ? Colors.green
-                            : Colors.grey[600],
-                        fontWeight: FontWeight.w500,
                       ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: _sending ? null : _sendMessage,
+                      icon: _sending
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.send),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          SizedBox(height: 10),
-          Text(
-            message,
-            style: TextStyle(
-              fontSize: 15,
-              color: Colors.grey[700],
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+
+          // Notification Tab Content (can be similar structure or different)
+          StreamBuilder<List<AppNotification>>(
+            stream: _firestoreService.getNotificationsStream(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+
+              final items = snapshot.data ?? [];
+              if (items.isEmpty) {
+                return const Center(child: Text('No notifications yet.'));
+              }
+
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: items.any((n) => !n.read)
+                            ? () async {
+                                await _firestoreService
+                                    .markAllNotificationsRead();
+                              }
+                            : null,
+                        child: const Text('Mark all read'),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                      itemCount: items.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        final n = items[index];
+                        return ListTile(
+                          tileColor: n.read ? Colors.white : Colors.grey[100],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          title: Text(
+                            n.title,
+                            style: TextStyle(
+                              fontWeight:
+                                  n.read ? FontWeight.w500 : FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Text(n.body),
+                          trailing: n.read
+                              ? null
+                              : const Icon(Icons.circle,
+                                  size: 10, color: Colors.orange),
+                          onTap: () async {
+                            if (!n.read) {
+                              await _firestoreService
+                                  .markNotificationRead(n.id);
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
-          if (hasImagePlaceholder) ...[
-            SizedBox(height: 10),
-            Container(
-              height: 100, // Height for the image placeholder
-              decoration: BoxDecoration(
-                color:
-                    Colors.grey[200], // Light grey background for placeholder
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Center(
-                child: Icon(Icons.image, size: 50, color: Colors.grey[400]),
-              ),
-            ),
-          ],
         ],
+      ),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }

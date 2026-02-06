@@ -53,13 +53,16 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
     return Scaffold(
-      body: SizedBox.expand(
-        child: Image.asset(
-          'assets/icon/makeit_logo.jpg',
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
+      body: Center(
+        child: SizedBox(
+          width: screenSize.width,
+          height: screenSize.height,
+          child: Image.asset(
+            'assets/icon/makeit_logo.jpg',
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );
