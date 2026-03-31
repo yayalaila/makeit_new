@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:makeit/login_screen.dart';
 import 'package:makeit/mentor_home_page.dart';
 import 'package:makeit/upload_course_page.dart';
+import 'package:makeit/main.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -83,6 +84,13 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  void _navigateToSettings() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SettingsPage()),
+    );
+  }
+
   Future<void> _logout() async {
     await FirebaseAuth.instance.signOut();
     if (mounted) {
@@ -96,15 +104,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
         title: Text(
           'Profile',
           style: TextStyle(
-            color: Colors.black87,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -130,7 +137,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   SizedBox(height: 5),
                   Text(
                     email,
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                    ),
                   ),
                   SizedBox(height: 10),
                   ElevatedButton(
@@ -164,7 +174,7 @@ class _ProfilePageState extends State<ProfilePage> {
             }),
             _buildMenuItem(Icons.card_membership, 'My Certificates',
                 onTap: () {}),
-            _buildMenuItem(Icons.settings, 'Settings', onTap: () {}),
+            _buildMenuItem(Icons.settings, 'Settings', onTap: _navigateToSettings),
             _buildMenuItem(Icons.help_outline, 'Help Center', onTap: () {}),
             _buildMenuItem(Icons.person_add, 'Become a Mentor',
                 onTap: _navigateToBecomeMentor),
@@ -202,6 +212,156 @@ class _ProfilePageState extends State<ProfilePage> {
       title: Text(title, style: TextStyle(fontSize: 16, color: color)),
       trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
       onTap: onTap,
+    );
+  }
+}
+
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool pushNotifications = true;
+  bool emailUpdates = true;
+  bool courseRecommendations = true;
+  bool autoplayPreviews = false;
+  bool downloadOverWifiOnly = true;
+  bool dataSaver = false;
+  bool showCertificates = true;
+  TimeOfDay reminderTime = TimeOfDay(hour: 19, minute: 0);
+  String language = 'English';
+
+  Future<void> _pickReminderTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: reminderTime,
+    );
+    if (picked != null && mounted) {
+      setState(() => reminderTime = picked);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeController = ThemeControllerScope.of(context);
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Settings'),
+        centerTitle: true,
+      ),
+      body: ListView(
+        padding: EdgeInsets.all(16),
+        children: [
+          Text('Appearance',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              )),
+          SwitchListTile(
+            title: Text('Dark Theme'),
+            subtitle: Text('Reduce eye strain in low light'),
+            value: themeController.isDark,
+            onChanged: (v) => setState(() => themeController.setDark(v)),
+          ),
+          Divider(height: 32),
+          Text('Learning Preferences',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              )),
+          SwitchListTile(
+            title: Text('Course Recommendations'),
+            subtitle: Text('Personalized suggestions based on activity'),
+            value: courseRecommendations,
+            onChanged: (v) => setState(() => courseRecommendations = v),
+          ),
+          SwitchListTile(
+            title: Text('Autoplay Course Previews'),
+            subtitle: Text('Auto-play short previews in course lists'),
+            value: autoplayPreviews,
+            onChanged: (v) => setState(() => autoplayPreviews = v),
+          ),
+          ListTile(
+            title: Text('Learning Reminder Time'),
+            subtitle: Text(
+              '${reminderTime.format(context)}',
+            ),
+            trailing: Icon(Icons.access_time),
+            onTap: _pickReminderTime,
+          ),
+          Divider(height: 32),
+          Text('Downloads & Data',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              )),
+          SwitchListTile(
+            title: Text('Wi-Fi Only Downloads'),
+            subtitle: Text('Prevent mobile data usage for downloads'),
+            value: downloadOverWifiOnly,
+            onChanged: (v) => setState(() => downloadOverWifiOnly = v),
+          ),
+          SwitchListTile(
+            title: Text('Data Saver'),
+            subtitle: Text('Lower video quality to save data'),
+            value: dataSaver,
+            onChanged: (v) => setState(() => dataSaver = v),
+          ),
+          Divider(height: 32),
+          Text('Notifications',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              )),
+          SwitchListTile(
+            title: Text('Push Notifications'),
+            subtitle: Text('Class updates and reminders'),
+            value: pushNotifications,
+            onChanged: (v) => setState(() => pushNotifications = v),
+          ),
+          SwitchListTile(
+            title: Text('Email Updates'),
+            subtitle: Text('Announcements and progress summaries'),
+            value: emailUpdates,
+            onChanged: (v) => setState(() => emailUpdates = v),
+          ),
+          Divider(height: 32),
+          Text('Account & Display',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              )),
+          SwitchListTile(
+            title: Text('Show Certificates Publicly'),
+            subtitle: Text('Display earned certificates on your profile'),
+            value: showCertificates,
+            onChanged: (v) => setState(() => showCertificates = v),
+          ),
+          ListTile(
+            title: Text('Language'),
+            subtitle: Text(language),
+            trailing: DropdownButton<String>(
+              value: language,
+              underline: SizedBox.shrink(),
+              items: [
+                'English',
+                'French',
+                'Spanish',
+                'Arabic',
+              ].map((lang) {
+                return DropdownMenuItem(
+                  value: lang,
+                  child: Text(lang),
+                );
+              }).toList(),
+              onChanged: (v) {
+                if (v == null) return;
+                setState(() => language = v);
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

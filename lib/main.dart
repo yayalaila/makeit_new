@@ -13,20 +13,74 @@ void main() async {
   runApp(MyApp());
 }
 
+class ThemeController extends ChangeNotifier {
+  bool _isDark = false;
+
+  bool get isDark => _isDark;
+
+  void setDark(bool value) {
+    if (_isDark == value) return;
+    _isDark = value;
+    notifyListeners();
+  }
+
+  void toggle() => setDark(!_isDark);
+}
+
+class ThemeControllerScope extends InheritedNotifier<ThemeController> {
+  const ThemeControllerScope({
+    super.key,
+    required ThemeController controller,
+    required Widget child,
+  }) : super(notifier: controller, child: child);
+
+  static ThemeController of(BuildContext context) {
+    final scope =
+        context.dependOnInheritedWidgetOfExactType<ThemeControllerScope>();
+    assert(scope != null, 'ThemeControllerScope not found in widget tree.');
+    return scope!.notifier!;
+  }
+}
+
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+
+  final ThemeController _themeController = ThemeController();
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'MakeIt',
-      home: SplashScreen(), // show splash first, then navigate to AuthGate
-      routes: {
-        '/login': (_) => LoginScreen(),
-        '/signup': (_) => SignUpScreen(),
-        '/home': (_) => StudentHomePage(),
-      },
+    return ThemeControllerScope(
+      controller: _themeController,
+      child: AnimatedBuilder(
+        animation: _themeController,
+        builder: (context, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'MakeIt',
+            theme: ThemeData(
+              brightness: Brightness.light,
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+              useMaterial3: true,
+            ),
+            darkTheme: ThemeData(
+              brightness: Brightness.dark,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.blue,
+                brightness: Brightness.dark,
+              ),
+              useMaterial3: true,
+            ),
+            themeMode:
+                _themeController.isDark ? ThemeMode.dark : ThemeMode.light,
+            home: SplashScreen(), // show splash first, then navigate to AuthGate
+            routes: {
+              '/login': (_) => LoginScreen(),
+              '/signup': (_) => SignUpScreen(),
+              '/home': (_) => StudentHomePage(),
+            },
+          );
+        },
+      ),
     );
   }
 }
